@@ -19,8 +19,6 @@ function themeColors() {
   return { grid, line, label }
 }
 
-  
-
 
 /** Split segments that pass midnight; keep order by start time */
 function normalizeSegments(segs: Segment[]): Segment[] {
@@ -281,9 +279,7 @@ export default function LogCanvas({ day }: { day: DayPlan }) {
               <strong>ELD Log — Day {day.index} ({day.date})</strong>
               <button className="button" onClick={()=>setOpen(false)} style={{padding:'6px 10px'}}>✕ Close</button>
             </div>
-            <div className="eld-canvas-wrap" ref={wrapModalRef}>
-              <canvas ref={modalRef} />
-            </div>
+            <canvas ref={modalRef} />
 
             <div className="note" style={{marginTop:8}}>{day.notes}</div>
           </div>
