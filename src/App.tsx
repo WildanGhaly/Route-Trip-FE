@@ -41,24 +41,26 @@ export default function App(){
               )}
             </div>
           </div>
-          {data && req && (
-            <>
-              <MapView
-                current={req.current_location}
-                pickup={req.pickup_location}
-                dropoff={req.dropoff_location}
-                polyline={data.route.polyline}
-              />
-              <div className="logs" style={{marginTop:12}}>
-                {data.days.map(d => <LogCanvas key={d.index} day={d} />)}
-              </div>
-            </>
+
+          {/* Map is always visible; we pass inputs if available */}
+          <MapView
+            busy={busy}
+            current={req?.current_location}
+            pickup={req?.pickup_location}
+            dropoff={req?.dropoff_location}
+            polyline={data?.route.polyline ?? null}
+          />
+
+          {data && (
+            <div className="logs" style={{marginTop:12}}>
+              {data.days.map(d => <LogCanvas key={d.index} day={d} />)}
+            </div>
           )}
         </div>
       </div>
       <hr/>
       <div className="note">
-        If the backend returns an encoded <code>polyline</code>, we draw it; otherwise we show a straight line between pickup and dropoff.
+        If the backend returns an encoded <code>polyline</code>, we draw it; otherwise a straight line.
         Set <code>VITE_API_BASE</code> in <code>.env.local</code> if needed.
       </div>
     </div>

@@ -31,8 +31,7 @@ async function geocode(q:string): Promise<[number,number]|null> {
 }
 
 function FitBounds({
-  line,
-  points,
+  line, points
 }: {
   line: [number,number][]|null,
   points: Array<[number,number]|null>
@@ -54,52 +53,95 @@ function FitBounds({
 }
 
 interface Props {
-  current: string
-  pickup: string
-  dropoff: string
+  current?: string
+  pickup?: string
+  dropoff?: string
   polyline?: string | null
+  busy?: boolean
 }
 
-export default function MapView({ current, pickup, dropoff, polyline }: Props) {
+export default function MapView({ current, pickup, dropoff, polyline, busy }: Props) {
   const [cur,  setCur]  = useState<[number,number]|null>(null)
   const [pick, setPick] = useState<[number,number]|null>(null)
   const [drop, setDrop] = useState<[number,number]|null>(null)
 
-  useEffect(()=>{ geocode(current).then(setCur) }, [current])
-  useEffect(()=>{ geocode(pickup).then(setPick) }, [pickup])
-  useEffect(()=>{ geocode(dropoff).then(setDrop) }, [dropoff])
+  useEffect(()=>{ current ? geocode(current).then(setCur) : setCur(null) }, [current])
+  useEffect(()=>{ pickup  ? geocode(pickup).then(setPick)  : setPick(null) }, [pickup])
+  useEffect(()=>{ dropoff ? geocode(dropoff).then(setDrop) : setDrop(null) }, [dropoff])
 
-  const line = useMemo(()=>{
+  // Decoded polyline from backend (if present)
+  const decodedLine = useMemo(()=>{
     if (!polyline) return null
-    try {
-      // pl.decode returns [ [lat, lon], ... ] with precision 5 by default
-      return pl.decode(polyline).map(([lat, lon]) => [lat, lon] as [number,number])
-    } catch {
-      return null
-    }
+    try { return pl.decode(polyline).map(([lat, lon]) => [lat, lon] as [number,number]) }
+    catch { return null }
   }, [polyline])
 
+  // Fallback straight segments:
+  // - current → pickup
+  // - pickup → dropoff
+  const fallbackSegments = useMemo(()=>{
+    const segs: [ [number,number], [number,number] ][] = []
+    if (cur && pick) segs.push([cur, pick])
+    if (pick && drop) segs.push([pick, drop])
+    return segs
+  }, [cur, pick, drop])
+
+  // Bounds: prefer polyline points; else all segment points; else markers
+  const lineForBounds = useMemo<[number,number][] | null>(() => {
+    if (decodedLine && decodedLine.length > 1) return decodedLine
+    if (fallbackSegments.length) return fallbackSegments.flat() as [number,number][]
+    return null
+  }, [decodedLine, fallbackSegments])
+
   const center = useMemo(()=> cur || pick || drop || ([39.5,-98.35] as [number,number]), [cur, pick, drop])
-  const fallbackLine = pick && drop ? [pick, drop] : null
 
   return (
     <div className="card">
       <h3>Map</h3>
-      <div className="map">
-        <MapContainer center={center as any} zoom={5} style={{height:'100%', width:'100%'}}>
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap"/>
-          <FitBounds line={line} points={[cur, pick, drop]} />
+      <div className="map" style={{ position:'relative' }}>
+        {/* Blurred map content while busy */}
+        <div style={{
+          filter: busy ? 'blur(2px) grayscale(0.3)' : 'none',
+          transition: 'filter 200ms',
+          height: '100%', width: '100%'
+        }}>
+          <MapContainer center={center as any} zoom={5} style={{height:'100%', width:'100%'}}>
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap"/>
+            <FitBounds line={lineForBounds} points={[cur, pick, drop]} />
 
-          {cur  && <Marker position={cur}  icon={iconCurrent}><Popup>Current: {current}</Popup></Marker>}
-          {pick && <Marker position={pick} icon={iconPickup}><Popup>Pickup: {pickup}</Popup></Marker>}
-          {drop && <Marker position={drop} icon={iconDrop}><Popup>Destination: {dropoff}</Popup></Marker>}
+            {/* Markers */}
+            {cur  && <Marker position={cur}  icon={iconCurrent}><Popup>Current: {current}</Popup></Marker>}
+            {pick && <Marker position={pick} icon={iconPickup}><Popup>Pickup: {pickup}</Popup></Marker>}
+            {drop && <Marker position={drop} icon={iconDrop}><Popup>Destination: {dropoff}</Popup></Marker>}
 
-          {line ? (
-            <Polyline positions={line as any} />
-          ) : (
-            fallbackLine && <Polyline positions={fallbackLine as any} />
-          )}
-        </MapContainer>
+            {/* Route / Fallback */}
+            {decodedLine ? (
+              <Polyline positions={decodedLine as any} />
+            ) : (
+              <>
+                {fallbackSegments.map((seg, i) => (
+                  <Polyline
+                    key={i}
+                    positions={seg as any}
+                    // dashed pre-pick leg to visually separate it (optional)
+                    pathOptions={i === 0 && cur && pick ? { dashArray: '6 6' } : undefined}
+                  />
+                ))}
+              </>
+            )}
+          </MapContainer>
+        </div>
+
+        {/* Overlay spinner during planning */}
+        {busy && (
+          <div style={{
+            position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center',
+            background:'rgba(255,255,255,0.45)', gap:10
+          }}>
+            <span className="spinner" />
+            <span style={{fontWeight:700, color:'#334155'}}>Planning trip…</span>
+          </div>
+        )}
       </div>
 
       {/* Legend */}
@@ -108,7 +150,7 @@ export default function MapView({ current, pickup, dropoff, polyline }: Props) {
         <Legend color="#16a34a" label="Pickup (Green)" />
         <Legend color="#dc2626" label="Destination (Red)" />
         <div className="note" style={{marginLeft:8}}>
-          If no route polyline is returned, we show a straight line between pickup and destination.
+          No polyline? We draw straight segments: <strong>current→pickup</strong> (dashed) and <strong>pickup→destination</strong>.
         </div>
       </div>
     </div>
