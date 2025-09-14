@@ -36,9 +36,9 @@ export default function TripForm({ onSubmit, busy }: Props) {
         <input type="number" className="number" value={form.current_cycle_used_hours}
           onChange={e=>update('current_cycle_used_hours', Number(e.target.value))} />
 
-        <label className="label">Assume Distance (mi) <span className="note">(testing shortcut)</span></label>
+        {/* <label className="label">Assume Distance (mi) <span className="note">(testing shortcut)</span></label>
         <input type="number" className="number" value={form.assume_distance_mi ?? ''}
-          onChange={e=>update('assume_distance_mi', Number(e.target.value))} />
+          onChange={e=>update('assume_distance_mi', Number(e.target.value))} /> */}
 
         <div style={{marginTop:12, display:'flex', gap:8}}>
           <button className="button" disabled={busy}

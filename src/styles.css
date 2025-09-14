@@ -50,3 +50,6 @@ hr{border:0;border-top:1px solid #eef2f7;margin:12px 0}
 
 /* ensure the map never trumps modals */
 .leaflet-container{ z-index:0 }
+
+.eld-modal-backdrop{ z-index:10000 } 
+.leaflet-container{ z-index:0 }

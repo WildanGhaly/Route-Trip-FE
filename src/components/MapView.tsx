@@ -96,7 +96,7 @@ export default function MapView({ current, pickup, dropoff, polyline, busy }: Pr
   const center = useMemo(()=> cur || pick || drop || ([39.5,-98.35] as [number,number]), [cur, pick, drop])
 
   return (
-    <div className="card">
+    <div className="card" id="map">
       <h3>Map</h3>
       <div className="map" style={{ position:'relative' }}>
         {/* Blurred map content while busy */}
@@ -150,7 +150,7 @@ export default function MapView({ current, pickup, dropoff, polyline, busy }: Pr
         <Legend color="#16a34a" label="Pickup (Green)" />
         <Legend color="#dc2626" label="Destination (Red)" />
         <div className="note" style={{marginLeft:8}}>
-          No polyline? We draw straight segments: <strong>current→pickup</strong> (dashed) and <strong>pickup→destination</strong>.
+          No polyline? draw straight segments: <strong>current→pickup</strong> (dashed) and <strong>pickup→destination</strong>.
         </div>
       </div>
     </div>

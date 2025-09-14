@@ -21,7 +21,7 @@ export default function App(){
 
   return (
     <div className="container">
-      <h1 style={{margin:'8px 0 16px'}}>HOS Trip Planner</h1>
+      <h1 style={{margin:'8px 0 16px'}}>HOS Trip Planner by Wildan Ghaly</h1>
       <div className="grid">
         <TripForm onSubmit={onSubmit} busy={busy} />
         <div>
@@ -42,7 +42,6 @@ export default function App(){
             </div>
           </div>
 
-          {/* Map is always visible; we pass inputs if available */}
           <MapView
             busy={busy}
             current={req?.current_location}
@@ -60,7 +59,7 @@ export default function App(){
       </div>
       <hr/>
       <div className="note">
-        If the backend returns an encoded <code>polyline</code>, we draw it; otherwise a straight line.
+        If the backend returns an encoded <code>polyline</code>, it draws it; otherwise a straight line.
         Set <code>VITE_API_BASE</code> in <code>.env.local</code> if needed.
       </div>
     </div>

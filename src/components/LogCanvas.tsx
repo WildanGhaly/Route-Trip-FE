@@ -185,11 +185,10 @@ export default function LogCanvas({ day }: { day: DayPlan }) {
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     const c = modalRef.current; if (c) {
-      const ctx = useHidpiCanvas(c, Math.min(window.innerWidth*0.9, 1600), 360)
+      const ctx = useHidpiCanvas(c, Math.min(window.innerWidth*0.75, 1600), 360)
       if (ctx) {
         // re-use draw logic at the current modal CSS size
         // quick hack: redraw into modal using the same function but with its own width/height
-        // We replicate core parts for modal:
         const Wm = c.clientWidth, Hm = 360
         const innerW = Wm - LEFT_GUTTER - RIGHT_PAD
         const laneH = (Hm - BOTTOM_PAD - TOP) / ROWS.length
