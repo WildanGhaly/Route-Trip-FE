@@ -43,7 +43,12 @@ export default function App(){
           </div>
           {data && req && (
             <>
-              <MapView pickup={req.pickup_location} dropoff={req.dropoff_location} polyline={data.route.polyline} />
+              <MapView
+                current={req.current_location}
+                pickup={req.pickup_location}
+                dropoff={req.dropoff_location}
+                polyline={data.route.polyline}
+              />
               <div className="logs" style={{marginTop:12}}>
                 {data.days.map(d => <LogCanvas key={d.index} day={d} />)}
               </div>
@@ -52,7 +57,10 @@ export default function App(){
         </div>
       </div>
       <hr/>
-      <div className="note">If the backend returns an encoded <code>polyline</code>, we draw it; otherwise a straight line. Set <code>VITE_API_BASE</code> in <code>.env.local</code> if needed.</div>
+      <div className="note">
+        If the backend returns an encoded <code>polyline</code>, we draw it; otherwise we show a straight line between pickup and dropoff.
+        Set <code>VITE_API_BASE</code> in <code>.env.local</code> if needed.
+      </div>
     </div>
   )
 }

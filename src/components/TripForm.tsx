@@ -9,7 +9,7 @@ export default function TripForm({ onSubmit, busy }: Props) {
     pickup_location: 'Denver, CO',
     dropoff_location: 'Los Angeles, CA',
     current_cycle_used_hours: 42,
-    assume_distance_mi: 1380
+    assume_distance_mi: 0
   })
 
   function update<K extends keyof PlanTripRequest>(k:K, v:PlanTripRequest[K]) {
