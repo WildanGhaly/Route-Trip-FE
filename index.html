@@ -6,13 +6,14 @@
     <title>HOS Trip Planner</title>
     <script>
       try {
-        const saved = localStorage.getItem('theme');
+        const saved = localStorage.getItem('themeMode') || 'system';
         const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = saved || (prefersDark ? 'dark' : 'light');
-        document.documentElement.setAttribute('data-theme', theme);
+        const applied = saved === 'dark' ? 'dark' : saved === 'light' ? 'light' : (prefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', applied);
       } catch {}
     </script>
   </head>
+
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

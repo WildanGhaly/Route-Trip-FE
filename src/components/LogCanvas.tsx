@@ -11,6 +11,17 @@ function toMin(hhmm: string) {
   return h*60 + m
 }
 
+function themeColors() {
+  const cs = getComputedStyle(document.documentElement)
+  const grid  = cs.getPropertyValue('--eld-grid').trim()   || '#e5e7eb'
+  const line  = cs.getPropertyValue('--eld-line').trim()   || '#111827'
+  const label = cs.getPropertyValue('--eld-label').trim()  || '#1f2937'
+  return { grid, line, label }
+}
+
+  
+
+
 /** Split segments that pass midnight; keep order by start time */
 function normalizeSegments(segs: Segment[]): Segment[] {
   const out: Segment[] = []
@@ -81,19 +92,21 @@ export default function LogCanvas({ day }: { day: DayPlan }) {
       on_duty:  TOP + laneH*3.5,
     }
 
-    // hour grid
-    ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1
+    const { grid, label } = themeColors()
+
+    ctx.strokeStyle = grid; ctx.lineWidth = 1
     for (let h=0; h<=24; h++) {
       const x = LEFT_GUTTER + (innerW/24)*h
       ctx.beginPath(); ctx.moveTo(x, TOP-10); ctx.lineTo(x, bottom+10); ctx.stroke()
     }
+
     // lane separators
     Object.values(rowY).forEach(y=>{
       ctx.beginPath(); ctx.moveTo(LEFT_GUTTER, y); ctx.lineTo(W-RIGHT_PAD, y); ctx.stroke()
     })
 
     // labels
-    ctx.fillStyle = '#334155'; ctx.font = '12px system-ui'; ctx.textAlign = 'left'
+    ctx.fillStyle = label; ctx.font = '12px system-ui'; ctx.textAlign = 'left'
     ROWS.forEach((r,i)=> ctx.fillText(r.toUpperCase(), 8, TOP + laneH*(i+0.2)))
     for (let h=0; h<=24; h+=2) {
       const x = LEFT_GUTTER + (innerW/24)*h
@@ -117,7 +130,8 @@ export default function LogCanvas({ day }: { day: DayPlan }) {
     const { rowY, innerW } = drawGrid(ctx)
     const xFor = (mm:number)=> LEFT_GUTTER + innerW * (mm/1440)
 
-    ctx.strokeStyle = '#111827'
+    const { line, label } = themeColors()
+    ctx.strokeStyle = line
     ctx.lineWidth = 3
 
     const list = normalizeSegments(day.segments)
@@ -154,7 +168,7 @@ export default function LogCanvas({ day }: { day: DayPlan }) {
       // label
       if (s.label) {
         const labelX = Math.max(x0 + 4, LEFT_GUTTER + 6)
-        ctx.fillStyle = '#1f2937'; ctx.font = '12px system-ui'
+        ctx.fillStyle = label; ctx.font = '12px system-ui'
         ctx.fillText(s.label, labelX, y - 10)
       }
 
@@ -185,11 +199,12 @@ export default function LogCanvas({ day }: { day: DayPlan }) {
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     const c = modalRef.current; if (c) {
-      const ctx = useHidpiCanvas(c, Math.min(window.innerWidth*0.75, 1600), 360)
+      const modalBox = c.parentElement as HTMLElement
+      const cssW = Math.min(modalBox?.clientWidth || window.innerWidth * 0.7, 1100)
+      const ctx = useHidpiCanvas(c, cssW, 360)
       if (ctx) {
-        // re-use draw logic at the current modal CSS size
-        // quick hack: redraw into modal using the same function but with its own width/height
-        const Wm = c.clientWidth, Hm = 360
+        const Wm = cssW, Hm = 360
+        const { grid, label, line } = themeColors()
         const innerW = Wm - LEFT_GUTTER - RIGHT_PAD
         const laneH = (Hm - BOTTOM_PAD - TOP) / ROWS.length
         const rowY: Record<DutyStatus, number> = {
@@ -197,10 +212,10 @@ export default function LogCanvas({ day }: { day: DayPlan }) {
         }
         const xFor = (mm:number)=> LEFT_GUTTER + innerW * (mm/1440)
         // grid
-        ctx.clearRect(0,0,Wm,Hm); ctx.save(); ctx.translate(.5,.5); ctx.strokeStyle='#e5e7eb'; ctx.lineWidth=1
+        ctx.clearRect(0,0,Wm,Hm); ctx.save(); ctx.translate(.5,.5); ctx.strokeStyle = grid; ctx.lineWidth = 1
         for (let h=0; h<=24; h++){ const x=LEFT_GUTTER+(innerW/24)*h; ctx.beginPath(); ctx.moveTo(x,TOP-10); ctx.lineTo(x,Hm-BOTTOM_PAD+10); ctx.stroke() }
         Object.values(rowY).forEach(y=>{ ctx.beginPath(); ctx.moveTo(LEFT_GUTTER,y); ctx.lineTo(Wm-RIGHT_PAD,y); ctx.stroke() })
-        ctx.fillStyle='#334155'; ctx.font='12px system-ui'; ctx.textAlign='left'
+        ctx.fillStyle = label; ctx.font='12px system-ui'; ctx.textAlign='left'
         ROWS.forEach((r,i)=> ctx.fillText(r.toUpperCase(), 8, TOP + laneH*(i+0.2)))
         for (let h=0; h<=24; h+=2){ const x=LEFT_GUTTER+(innerW/24)*h; if(h===24){ctx.textAlign='right';ctx.fillText('24',x-2,Hm-8);ctx.textAlign='left'} else {ctx.fillText(String(h).padStart(2,'0'),x+2,Hm-8)}}
         ctx.restore()
@@ -210,7 +225,7 @@ export default function LogCanvas({ day }: { day: DayPlan }) {
           const firstStart = list.length ? toMin(list[0].t0) : 1440
           list.unshift({ t0:'00:00', t1:`${String(Math.floor(firstStart/60)).padStart(2,'0')}:${String(firstStart%60).padStart(2,'0')}`, status:'off', label:'' })
         }
-        ctx.strokeStyle='#111827'; ctx.lineWidth=3
+        ctx.strokeStyle = line; ctx.lineWidth = 3
         let cursorX:number|null=null, cursorY:number|null=null
         for (const s of list){
           const x0=xFor(toMin(s.t0)), x1=xFor(toMin(s.t1)), y=rowY[s.status]
@@ -266,7 +281,10 @@ export default function LogCanvas({ day }: { day: DayPlan }) {
               <strong>ELD Log — Day {day.index} ({day.date})</strong>
               <button className="button" onClick={()=>setOpen(false)} style={{padding:'6px 10px'}}>✕ Close</button>
             </div>
-            <canvas ref={modalRef} />
+            <div className="eld-canvas-wrap" ref={wrapModalRef}>
+              <canvas ref={modalRef} />
+            </div>
+
             <div className="note" style={{marginTop:8}}>{day.notes}</div>
           </div>
         </div>

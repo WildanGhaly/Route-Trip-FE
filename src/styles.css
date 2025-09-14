@@ -2,7 +2,7 @@
 :root{
   --bg:#f7f9fc;
   --text:#0b1220;
-  --card:#fff;
+  --card:#ffffff;
   --border:#e5e7eb;
   --muted:#334155;
   --badge-bg:#eef2ff;
@@ -10,7 +10,14 @@
   --button-bg:#111827;
   --button-text:#ffffff;
   --overlay:rgba(255,255,255,0.45);
+
+  /* ELD canvas theme */
+  --eld-grid:#e5e7eb;
+  --eld-line:#111827;
+  --eld-label:#1f2937;
+  --eld-canvas-bg:#ffffff;
 }
+
 [data-theme="dark"]{
   --bg:#0b1220;
   --text:#e5eaf3;
@@ -22,69 +29,130 @@
   --button-bg:#334155;
   --button-text:#e5eaf3;
   --overlay:rgba(15,23,42,0.45);
+
+  /* ELD canvas theme (dark) */
+  --eld-grid:#334155;
+  --eld-line:#e5eaf3;
+  --eld-label:#e5eaf3;
+  --eld-canvas-bg:#0f172a;
 }
 
 /* BASE */
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--text);background:var(--bg)}
-.container{max-width:1280px;margin:24px auto;padding:0 16px}
+*{ box-sizing:border-box }
+body{
+  margin:0;
+  font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  color:var(--text);
+  background:var(--bg);
+}
+.container{ max-width:1280px; margin:24px auto; padding:0 16px }
 
 /* HEADER BAR */
 .header{
   display:flex; align-items:center; justify-content:space-between;
   gap:12px; margin-bottom:12px;
 }
-.header h1{margin:0}
-.toolbar{display:flex; gap:8px; align-items:center}
+.header h1{ margin:0 }
+.toolbar{ display:flex; gap:8px; align-items:center }
 .iconbtn{
   background:transparent; color:var(--text); border:1px solid var(--border);
   padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:600;
 }
 
 /* STACKED LAYOUT */
-.grid{display:grid; grid-template-columns:1fr; gap:20px}
+.grid{ display:grid; grid-template-columns:1fr; gap:20px }
 
-.card{background:var(--card); border:1px solid var(--border); border-radius:14px; box-shadow:0 1px 2px rgba(0,0,0,.05)}
-.card h3{margin:0; padding:12px 16px; border-bottom:1px solid var(--border)}
-.section{padding:12px 16px}
-
-.label{display:block; font-weight:600; margin:8px 0 6px}
-.input,.number{width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text)}
-.button{
-  display:inline-block; background:var(--button-bg); color:var(--button-text); border:0;
-  padding:10px 14px; border-radius:10px; font-weight:600; cursor:pointer
+/* CARDS */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow:0 1px 2px rgba(0,0,0,.05);
 }
-.button:disabled{opacity:.6; cursor:not-allowed}
+.card h3{
+  margin:0; padding:12px 16px;
+  border-bottom:1px solid var(--border);
+}
+.section{ padding:12px 16px }
 
-.summary{display:flex; gap:12px; flex-wrap:wrap}
-.badge{background:var(--badge-bg); color:var(--badge-text); border-radius:999px; padding:8px 12px; font-weight:600; font-size:14px}
+/* FORM */
+.label{ display:block; font-weight:600; margin:8px 0 6px }
+.input,.number{
+  width:100%; padding:10px 12px;
+  border:1px solid var(--border); border-radius:10px;
+  background:var(--card); color:var(--text);
+}
+.button{
+  display:inline-block; background:var(--button-bg); color:var(--button-text);
+  border:0; padding:10px 14px; border-radius:10px; font-weight:600; cursor:pointer;
+}
+.button:disabled{ opacity:.6; cursor:not-allowed }
+
+/* SUMMARY */
+.summary{ display:flex; gap:12px; flex-wrap:wrap }
+.badge{
+  background:var(--badge-bg); color:var(--badge-text);
+  border-radius:999px; padding:8px 12px; font-weight:600; font-size:14px;
+}
 
 /* MAP */
-.map{height:560px; border-bottom-left-radius:14px; border-bottom-right-radius:14px; overflow:hidden}
-.leaflet-container{z-index:0}
-hr{border:0; border-top:1px solid var(--border); margin:12px 0}
+.map{
+  height:560px;
+  border-bottom-left-radius:14px; border-bottom-right-radius:14px;
+  overflow:hidden;
+}
+.leaflet-container{ z-index:0 }
+hr{ border:0; border-top:1px solid var(--border); margin:12px 0 }
 
-/* LOGS: one per row */
-.logs{display:grid; grid-template-columns:1fr; gap:16px}
-canvas{width:100%; height:auto; border:1px solid var(--border); border-radius:10px; background:var(--card)}
-
-.note{font-size:12px; color:var(--muted)}
+/* LOGS (one per row) */
+.logs{ display:grid; grid-template-columns:1fr; gap:16px }
+/* Make canvases use ELD background token for proper dark mode */
+canvas{
+  width:100%; height:auto;
+  border:1px solid var(--border); border-radius:10px;
+  background:var(--eld-canvas-bg);
+}
+.note{ font-size:12px; color:var(--muted) }
 
 /* SPINNER */
-.spinner{width:18px; height:18px; border:3px solid #94a3b8; border-top-color:transparent; border-radius:50%; animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{
+  width:18px; height:18px; border:3px solid #94a3b8; border-top-color:transparent;
+  border-radius:50%; animation:spin .8s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg) } }
 
-/* MODALS (shared + ELD) */
+/* MODALS (shared backdrop) */
 .modal-backdrop,.eld-modal-backdrop{
   position:fixed; inset:0; background:rgba(15,23,42,.55);
   display:flex; align-items:center; justify-content:center; z-index:10000;
 }
-.modal,.eld-modal{
+
+/* Help/tutorial modal: comfortably narrow */
+.modal{
   background:var(--card); border:1px solid var(--border); border-radius:12px;
-  max-width:min(96vw,1500px); width:95vw; padding:16px;
-  box-shadow:0 10px 30px rgba(0,0,0,.2); color:var(--text)
+  width:clamp(320px, 60vw, 720px);
+  max-width:100%;
+  padding:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.2);
+  color:var(--text);
 }
-.eld-modal canvas{ width:100%; height:auto; border:1px solid var(--border); border-radius:10px; background:var(--card) }
+
+/* ELD modal: wider but NOT edge-to-edge */
+.eld-modal{
+  background:var(--card); border:1px solid var(--border); border-radius:12px;
+  width:clamp(360px, 90vw, 1200px);
+  max-width:100%;
+  padding:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.2);
+  color:var(--text);
+}
+
+/* Ensure ELD canvas fills modal content properly */
+.eld-modal .eld-canvas-wrap{ width:100%; }
+.eld-modal canvas{
+  display:block; width:100%; height:auto;
+  border:1px solid var(--border); border-radius:10px; background:var(--eld-canvas-bg);
+}
 
 /* HELP floating button (optional) */
 .help-fab{
