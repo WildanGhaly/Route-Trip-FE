@@ -136,10 +136,10 @@ export default function MapView({ current, pickup, dropoff, polyline, busy }: Pr
         {busy && (
           <div style={{
             position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center',
-            background:'rgba(255,255,255,0.45)', gap:10
+            background:'var(--overlay)', gap:10
           }}>
             <span className="spinner" />
-            <span style={{fontWeight:700, color:'#334155'}}>Planning trip…</span>
+            <span style={{fontWeight:700}}>Planning trip…</span>
           </div>
         )}
       </div>
